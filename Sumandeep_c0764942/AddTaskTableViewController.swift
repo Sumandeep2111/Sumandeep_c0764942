@@ -7,9 +7,10 @@
 //
 
 import UIKit
+import CoreData
 
 class AddTaskTableViewController: UITableViewController {
-    var AddTasks:[Taskinfo]?
+    var AddTasks: [Taskinfo]?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -18,7 +19,34 @@ class AddTaskTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        loadCoreData()
     }
+    
+    func loadCoreData() {
+           AddTasks = [Taskinfo]()
+           // create an instance of app delegate
+           let appDelegate = UIApplication.shared.delegate as! AppDelegate
+           // second step is context
+           let managedContext = appDelegate.persistentContainer.viewContext
+           
+           let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TaskEntity")
+           
+           do {
+               let task = try managedContext.fetch(fetchRequest)
+               if task is [NSManagedObject] {
+                   for taskres in task as! [NSManagedObject] {
+                       let taskname = taskres.value(forKey: "name") as! String
+                       
+                       AddTasks?.append(Taskinfo(name: taskname))
+                    tableView.reloadData()
+                   
+                   }
+               }
+           } catch {
+               print(error)
+           }
+           
+       }
 
     // MARK: - Table view data source
 
@@ -34,23 +62,30 @@ class AddTaskTableViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+         let task = AddTasks![indexPath.row]
+                let cell = tableView.dequeueReusableCell(withIdentifier: "cellAdd")
+            
+       
+                cell?.textLabel?.text = task.name
 
         // Configure the cell...
 
-        return cell
+        return cell!
     }
     
-
-    /*
+    func updateTask(taskArray: [Taskinfo]){
+        AddTasks = taskArray
+        tableView.reloadData()
+    }
+    
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         return true
     }
-    */
+    
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
@@ -60,7 +95,7 @@ class AddTaskTableViewController: UITableViewController {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
     }
-    */
+    
 
     /*
     // Override to support rearranging the table view.
@@ -77,14 +112,18 @@ class AddTaskTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
+        if let detailView = segue.destination as? TaskViewController {
+            detailView.TaskTable = self
+            detailView.AddTasks = AddTasks
+        }
     }
-    */
+    
 
 }

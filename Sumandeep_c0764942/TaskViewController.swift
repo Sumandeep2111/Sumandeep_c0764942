@@ -13,9 +13,12 @@ class TaskViewController: UIViewController {
 
     var AddTasks:[Taskinfo]?
     var TaskTable:AddTaskTableViewController?
+    
+    @IBOutlet weak var taskTextfld: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-    loadCoreData()
+    saveCoreData()
         NotificationCenter.default.addObserver(self,selector: #selector(saveCoreData),name: UIApplication.willResignActiveNotification, object: nil)
         // Do any additional setup after loading the view.
     }
@@ -29,6 +32,17 @@ class TaskViewController: UIViewController {
         }
         return ""
     }
+    
+    
+    @IBAction func addTasks(_ sender: UIButton) {
+        
+        let name = taskTextfld.text ?? ""
+        let task = Taskinfo(name: name)
+        AddTasks?.append(task)
+        taskTextfld.text = ""
+        taskTextfld.resignFirstResponder()
+    }
+    
     
     @objc func saveCoreData() {
            // call clear core data
@@ -100,14 +114,16 @@ class TaskViewController: UIViewController {
         
     }
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
+        
+        TaskTable?.updateTask(taskArray: AddTasks!)
     }
-    */
+    
 
 }
